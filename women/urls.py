@@ -3,10 +3,37 @@ from .views import WomenAPIView, WomenAPIList, WomenAPIUpdate, WomenAPIDetailVie
 from rest_framework import routers
 
 
+class MyCustomRouter(routers.SimpleRouter):
+    
+    routes = [
+        routers.Route(
+            url=r'^{prefix}{trailing_slash}$',
+            mapping={
+                'get': 'list',
+                'post': 'create'
+            },
+            name='{basename}-list',
+            detail=False,
+            initkwargs={'suffix': 'List'}
+        ),
+        routers.Route(
+            url=r'^{prefix}/{lookup}{trailing_slash}$',
+            mapping={
+                'get': 'retrieve',
+                'put': 'update',
+                'patch': 'partial_update',
+                'delete': 'destroy'
+            },
+            name='{basename}-detail',
+            detail=True,
+            initkwargs={'suffix': 'Instance'}
+        ),
+    ]
 
 
-router = routers.SimpleRouter()
-router.register(r'api/v1/women/', WomenViewSet)
+
+router = MyCustomRouter()
+router.register(r'api/v1/women/', WomenViewSet, basename='women')
   
 urlpatterns = [
     

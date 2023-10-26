@@ -1,6 +1,8 @@
 from django.shortcuts import render
-from rest_framework import generics
-from .models import Women
+from rest_framework import generics, mixins
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.decorators import action
+from .models import Women, Category
 from .serializers import WomenSerializer
 from rest_framework.views import APIView
 from rest_framework import viewsets
@@ -9,9 +11,25 @@ from django.forms import model_to_dict
 # Create your views here.
 
 
-class WomenViewSet(viewsets.ModelViewSet):
+class WomenViewSet(mixins.CreateModelMixin,
+                   mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   GenericViewSet):
     queryset = Women.objects.all()
     serializer_class = WomenSerializer
+
+    def get_queryset(self):
+        pk=self.kwargs.get("pk")
+        if not pk:
+            return Women.objects.all()[:3]
+        return Women.objects.filter(pk=pk)
+
+    @action(method=['get'], detail=False)
+    def category(self, request, pk=None):              # DRF_RUS 9-video
+        cats = Category.objects.all()
+        return Response({'cats':[c.name for c in cats]})
 
 
 
